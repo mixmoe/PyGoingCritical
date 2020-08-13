@@ -1,13 +1,13 @@
 # flake8:noqa:E501
-from typing import Callable, Dict, Optional, Iterator
+from queue import Queue
+from threading import Thread
+from typing import Callable, Dict, Iterator, Optional
 
 from PIL import Image, ImageColor
 
 from utils.misc import TimeIt
-from threading import Thread
-from queue import Queue
 
-from .core import Network, Status, Node
+from .core import Network, Node, Status
 
 SpreadModel_T = Callable[[Network], Iterator[Network]]
 Render_T = Callable[[Network, ...], Callable[..., Image]]  # type:ignore
