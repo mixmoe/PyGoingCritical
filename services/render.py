@@ -57,12 +57,14 @@ class Render:
         return c, x, y
 
     @TimeIt
-    def __call__(self) -> ImageClass:
+    def export(self) -> ImageClass:
         background = self.rendBackground()
         for i in self.network.all:
             cell, x, y = self.rendCell(i)
             background.paste(cell, (x, y), cell)
         return background
+
+    __call__ = export
 
 
 class DensityRender(Render):
