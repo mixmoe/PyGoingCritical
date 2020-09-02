@@ -1,16 +1,17 @@
 # flake8:noqa:E501
 from queue import Queue
 from threading import Thread
-from typing import Callable, Dict, Iterator, Optional
+from typing import Any, Callable, Dict, Iterator, Optional, Tuple
 
 from PIL import Image, ImageColor
+from PIL.Image import Image as ImageClass
 
 from utils.misc import TimeIt
 
 from .core import Network, Node, Status
 
 SpreadModel_T = Callable[[Network], Iterator[Network]]
-Render_T = Callable[[Network, ...], Callable[..., Image]]  # type:ignore
+Render_T = Callable[[Network], Callable[..., ImageClass]]
 
 COLOR_MAP = {
     Status.SUSCEPTIBLE: "#569AE2",
@@ -37,10 +38,10 @@ class Render:
         self.gridColor = gridColor or GRID_COLOR
         self.colorMap = colorMap or COLOR_MAP
 
-    def rendBackground(self):
+    def rendBackground(self) -> ImageClass:
         height, width = self.network.height, self.network.width
         return Image.new(
-            "RGB",
+            "RGBA",
             (
                 height * (self.cellSize + self.gridSize) + self.gridSize,
                 width * (self.cellSize + self.gridSize) + self.gridSize,
@@ -48,64 +49,28 @@ class Render:
             self.gridColor,
         )
 
-    def rendCell(self, cell: Node):
-        x = cell.x * self.cellSize + self.gridSize
-        y = cell.y * self.cellSize + self.gridSize
-        c = Image.new(
-            "RGB",
-            (self.cellSize, self.cellSize),
-            ImageColor.getrgb(self.colorMap[cell.status]),
-        )
+    def rendCell(self, cell: Node) -> Tuple[ImageClass, int, int]:
+        x = cell.x * (self.cellSize + self.gridSize) + self.gridSize
+        y = cell.y * (self.cellSize + self.gridSize) + self.gridSize
+        r, g, b, *_ = ImageColor.getrgb(self.colorMap[cell.status])
+        c = Image.new("RGBA", (self.cellSize, self.cellSize), (r, g, b, 0xBF))
         return c, x, y
 
     @TimeIt
-    def __call__(self):
+    def __call__(self) -> ImageClass:
         background = self.rendBackground()
         for i in self.network.all:
             cell, x, y = self.rendCell(i)
-            background.paste(cell, (x, y))
+            background.paste(cell, (x, y), cell)
         return background
 
 
 class DensityRender(Render):
     def rendCell(self, cell: Node):
         assert cell.density >= 1 and cell.density <= 2
-        x = cell.x * self.cellSize + self.gridSize
-        y = cell.y * self.cellSize + self.gridSize
-        r, g, b = ImageColor.getrgb(self.colorMap[cell.status])  # type:ignore
-        a = 0x80 + (cell.density - 1) * 0x80
-        return Image.new("RGBA", (self.cellSize, self.cellSize), (r, g, b, a)), x, y
-
-
-class Processor:
-    def __init__(
-        self, model: SpreadModel_T, render: Render_T, size: int, queueSize: int = 10
-    ):
-        self._frameQueue: Queue[Image] = Queue(queueSize)  # type:ignore
-        self._size = size
-        self.model = model
-        self.render = render
-        self.rendThread = Thread(target=self.rend)
-        self.stopped = False
-
-    def rend(self):
-        network = Network(self._size, self._size)
-        for i in self.model(network):
-            if self.stopped:
-                break
-            self._frameQueue.put(self.render(i)())  # type:ignore
-        self.stopped = True
-
-    def start(self):
-        self.rendThread.start()
-
-    def stop(self):
-        self.stopped = True
-
-    def __iter__(self):
-        return self
-
-    def __next__(self) -> Image:
-        if self.stopped and self._frameQueue.empty():
-            raise StopIteration
-        return self._frameQueue.get()  # type:ignore
+        x = cell.x * (self.cellSize + self.gridSize) + self.gridSize
+        y = cell.y * (self.cellSize + self.gridSize) + self.gridSize
+        r, g, b, *_ = ImageColor.getrgb(self.colorMap[cell.status])
+        a = 0xBF + round((cell.density - 1) * 0x40)
+        c = Image.new("RGBA", (self.cellSize, self.cellSize), (r, g, b, a))
+        return c, x, y
