@@ -64,9 +64,6 @@ def SusceptibleInflectedSusceptible(
             break
         for position in inflectNodes:
             node = network.get(*position)
-            node.status = (
-                Status.SUSCEPTIBLE if random() <= recoveryRate else Status.INFLECTED
-            )
             nearbyNodes.update({(i.x, i.y) for i in network.nearby(node=node)})
         for position in nearbyNodes:
             node = network.get(*position)
@@ -78,6 +75,10 @@ def SusceptibleInflectedSusceptible(
                 else transmissionRate
             ):
                 node.status = Status.INFLECTED
+        for inflected in filter(lambda x: x.status == Status.INFLECTED, network.all):
+            if not random() <= recoveryRate:
+                continue
+            inflected.status = Status.SUSCEPTIBLE
         calculateStep += 1
         yield network.deepcopy()
     logger.info(f"SIS model calculate finished in {calculateStep} steps.")
