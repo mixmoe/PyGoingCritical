@@ -12,6 +12,7 @@
         "RGBA",
         "Skinid",
         "Yuki",
+        "asdict",
         "asyncio",
         "busid",
         "coro",
