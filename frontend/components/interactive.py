@@ -2,6 +2,7 @@ import tkinter as tk
 from typing import Tuple
 
 from PIL import Image, ImageTk
+
 from ..bus import EventBus
 
 

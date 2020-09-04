@@ -1,10 +1,11 @@
-from .components.interactive import InteractiveRoot, AdjustLayerRoot, ButtonsLayerRoot
-from .bus import EventBus
-from services.render import Render
 from services.core import Network
 from services.models import SusceptibleInflectedRemoved
+from services.render import Render
 
 from .builder import BuilderRoot
+from .bus import EventBus
+from .components.interactive import (AdjustLayerRoot, ButtonsLayerRoot,
+                                     InteractiveRoot)
 
 BuilderRoot["main"]["SIRmodel"] = InteractiveRoot
 BuilderRoot["main"]["SIRmodel"].setInitArgs(name="SIRmodel")

@@ -1,7 +1,6 @@
 # flake8:noqa:F401
 import tkinter as tk
 
-
 from .builder import BuilderRoot
 
 
