@@ -52,6 +52,7 @@ class Builder:
 
     def init(self, root: TkComponent_T):
         self.component = self.widget(root, **self.kwargs)
+        self.component.pack()
         for k, v in self.componentTree.items():
             logger.debug(f"Initializing component {k!r} with root {root!r}.")
             v.init(root=self.component)

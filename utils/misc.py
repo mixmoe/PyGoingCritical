@@ -1,19 +1,22 @@
 import time
 from functools import wraps
-from typing import Callable
+from typing import TypeVar
 
 from .log import logger
 
+_T = TypeVar("_T")
 
-def TimeIt(func: Callable) -> Callable:
+
+def TimeIt(func: _T) -> _T:
+    assert callable(func)
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         beginTime = time.time() * 1000
         try:
             return func(*args, **kwargs)
-        except Exception:
+        finally:
             endTime = time.time() * 1000
             logger.debug(f"Function {func} cost {endTime-beginTime:.3f}ms")
 
-    return wrapper
-
+    return wrapper  # type:ignore
