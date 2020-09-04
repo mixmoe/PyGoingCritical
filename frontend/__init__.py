@@ -9,7 +9,7 @@ class MainApplication(tk.Frame):
         super().__init__(root)
         self.pack()
 
-        from . import SIRmodel
+        from . import SISmodel
 
 
 BuilderRoot["main"] = MainApplication
