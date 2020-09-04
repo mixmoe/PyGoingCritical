@@ -123,5 +123,4 @@ class Network:
         )
 
     def __iter__(self) -> Iterator[Node]:
-        for i in self.all:
-            yield i
+        return iter(self.all)

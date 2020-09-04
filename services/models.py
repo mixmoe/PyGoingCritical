@@ -1,9 +1,10 @@
 from random import random
 from typing import Iterator, Optional, Set, Tuple
 
-from .core import Network, Status
 from utils.log import logger
 from utils.misc import TimeIt
+
+from .core import Network, Status
 
 
 @TimeIt
