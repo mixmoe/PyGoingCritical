@@ -3,7 +3,13 @@ from typing import Tuple
 
 from PIL import Image, ImageTk
 
-from ..bus import EventBus
+from ..bus import EventBusNamespace
+
+
+class BusProvider:
+    def __init__(self, name: str) -> None:
+        self.rootComponent: "InteractiveRoot" = EventBusNamespace.get(name, "component")
+        self.eventBus = EventBusNamespace.get(name)
 
 
 class ImageView(tk.Frame):
@@ -25,9 +31,10 @@ class ImageView(tk.Frame):
         self.update()
 
 
-class ButtonsLayerRoot(tk.Frame):
+class ButtonsLayerRoot(tk.Frame, BusProvider):
     def __init__(self, root: tk.Widget, *, name: str):
-        super().__init__(root)
+        tk.Frame.__init__(self, root)
+        BusProvider.__init__(self, name)
         self.widgetName = name
         self.stepButton = tk.Button(master=self, text="步进", command=self.imageStep)
         self.playControlButton = tk.Button(
@@ -42,16 +49,16 @@ class ButtonsLayerRoot(tk.Frame):
         self.paused = True
 
     def imageStep(self):
-        EventBus.broadcast(f"{self.widgetName}_step", self)
+        self.eventBus.broadcast("step", self.rootComponent)
 
     def imagePlayControl(self):
-        EventBus.broadcast(f"{self.widgetName}_play_control", self)
+        self.eventBus.broadcast("play_control", self.rootComponent)
 
     def imageReset(self):
-        EventBus.broadcast(f"{self.widgetName}_reset", self)
+        self.eventBus.broadcast("reset", self.rootComponent)
 
 
-class AdjustLayerRoot(tk.Frame):
+class AdjustLayerRoot(tk.Frame, BusProvider):
     def __init__(
         self,
         root: tk.Widget,
@@ -60,8 +67,10 @@ class AdjustLayerRoot(tk.Frame):
         enableRecovery: bool = False,
         enableDensity: bool = False,
     ):
-        super().__init__(root)
+        tk.Frame.__init__(self, master=root)
+        BusProvider.__init__(self, name=name)
         self.widgetName = name
+        self.densityEnabled = tk.BooleanVar(master=self, value=False)
         self.transmissionRateText = tk.Label(master=self, text="传染率")
         self.transmissionRateAdjuster = tk.Scale(
             master=self,
@@ -87,6 +96,7 @@ class AdjustLayerRoot(tk.Frame):
         self.withDensityCheckbox = tk.Checkbutton(
             master=self,
             state=tk.NORMAL if enableDensity else tk.DISABLED,
+            variable=self.densityEnabled,
             command=self.densityStatusSwitch,
         )
 
@@ -101,14 +111,22 @@ class AdjustLayerRoot(tk.Frame):
         self.withDensityText.grid(column=2, row=0, sticky=tk.S)
         self.withDensityCheckbox.grid(column=2, row=1, sticky=tk.N)
 
+        if enableDensity:
+            self.densityStatusSwitch()
+
     def transmissionRateAdjust(self):
-        EventBus.broadcast(f"{self.widgetName}_transmission_adjust", self)
+        self.eventBus.broadcast("transmission_adjust", self.rootComponent)
 
     def recoveryRateAdjust(self):
-        EventBus.broadcast(f"{self.widgetName}_recovery_adjust", self)
+        self.eventBus.broadcast("recovery_adjust", self.rootComponent)
 
     def densityStatusSwitch(self):
-        EventBus.broadcast(f"{self.widgetName}_density_switch", self)
+        self.eventBus.broadcast("density_switch", self.rootComponent)
+        if self.densityEnabled.get():
+            self.withDensityCheckbox.configure(text="启用")
+        else:
+            self.withDensityCheckbox.configure(text="禁用")
+        self.withDensityCheckbox.update()
 
 
 class InteractiveRoot(tk.Frame):
@@ -120,8 +138,12 @@ class InteractiveRoot(tk.Frame):
         enableRecovery: bool = False,
         enableDensity: bool = False,
     ):
+        global _EVENT_BUS
         super().__init__(root)
         self.widgetName = name
+        self.eventBus = EventBusNamespace.register(name)
+        EventBusNamespace.set(name, component=self)
+
         self.imageView = ImageView(root=self, imageSize=(400, 400))
         self.buttons = ButtonsLayerRoot(root=self, name=name)
         self.adjust = AdjustLayerRoot(
@@ -135,4 +157,4 @@ class InteractiveRoot(tk.Frame):
         self.buttons.grid(column=0, row=1)
         self.adjust.grid(column=0, row=2)
 
-        EventBus.broadcast(f"{name}_init", self)
+        self.after(20, lambda: self.eventBus.broadcast("init", self))
