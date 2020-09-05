@@ -1,21 +1,33 @@
+import tkinter as tk
+from typing import Any, Dict
+
 from services.core import Network
 from services.models import SusceptibleInflectedSusceptible
-from services.render import Render
+from services.render import DensityRender
 
 from ..bus import EventBusNamespace
 from ..components.interactive import InteractiveRoot
 
 __view_name__ = "SISModelPlus"
 __view_widget__ = InteractiveRoot
-__view_args__ = {"name": __view_name__, "enableRecovery": True, "enableDensity": True}
+__view_args__: Dict[str, Any] = {
+    "name": __view_name__,
+    "enableRecovery": True,
+    "enableDensity": True,
+}
 
 EventBus = EventBusNamespace.get(__view_name__, create=True)
 
-_DENSITY_ENABLED = False
+_DENSITY_ENABLED = True
 _MODEL = None
 _NETWORK = Network(30, 30)
 _RECOVERY_RATE = 0
 _TRANSMISSION_RATE = 0
+
+
+class SISModelPlusRoot(InteractiveRoot):
+    def __init__(self, root: tk.Widget) -> None:
+        super().__init__(root, **__view_args__)
 
 
 @EventBus.subscribe("reset")
@@ -23,7 +35,10 @@ _TRANSMISSION_RATE = 0
 def modelInit(component: InteractiveRoot):
     global _MODEL, _NETWORK
     _MODEL, _NETWORK = None, Network(30, 30)
-    image = Render(network=_NETWORK).export()
+    if _DENSITY_ENABLED:
+        _NETWORK.makeDensityDistribution((10, 10), radius=10)
+        _NETWORK.makeDensityDistribution((25, 25), radius=7)
+    image = DensityRender(network=_NETWORK).export()
     component.imageView.setImage(image=image)
 
 
@@ -66,7 +81,7 @@ def transmissionStep(component: InteractiveRoot):
     except StopIteration:
         component.buttons.imagePlayControl()
         return
-    image = Render(network=_NETWORK).export()
+    image = DensityRender(network=_NETWORK).export()
     component.imageView.setImage(image=image)
 
 

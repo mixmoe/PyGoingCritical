@@ -1,3 +1,6 @@
+import tkinter as tk
+from typing import Any, Dict
+
 from services.core import Network
 from services.models import SusceptibleInflectedRemoved
 from services.render import Render
@@ -7,13 +10,18 @@ from ..components.interactive import InteractiveRoot
 
 __view_name__ = "SIRModel"
 __view_widget__ = InteractiveRoot
-__view_args__ = {"name": __view_name__}
+__view_args__: Dict[str, Any] = {"name": __view_name__}
 
 EventBus = EventBusNamespace.get(__view_name__, create=True)
 
 _MODEL = None
 _NETWORK = Network(30, 30)
 _TRANSMISSION_RATE = 0
+
+
+class SIRModelRoot(InteractiveRoot):
+    def __init__(self, root: tk.Widget):
+        super().__init__(root, **__view_args__)
 
 
 @EventBus.subscribe("reset")

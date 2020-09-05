@@ -37,6 +37,7 @@ class _EventBus:
                 raise
 
         self.events[event] = self.events.get(event, set()) | {wrapper}  # type:ignore
+        logger.debug(f"{handler}")
         return handler
 
     @TimeIt
@@ -61,7 +62,8 @@ class EventBusNamespace:
 
     @classmethod
     def register(cls, name: str) -> _EventBus:
-        cls._eventBuses[name] = _EventBus(name)
+        if name not in cls._eventBuses:
+            cls._eventBuses[name] = _EventBus(name)
         logger.debug(f"Event namespace {name!r} is created.")
         return cls.get(name)
 

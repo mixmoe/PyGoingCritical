@@ -1,8 +1,9 @@
 import tkinter as tk
 
-from frontend.builder import BuilderRoot
+from frontend import MainApplication
 
 if __name__ == "__main__":
     root = tk.Tk()
-    BuilderRoot(root=root)
+    main = MainApplication(root)
+    main.pack()
     root.mainloop()

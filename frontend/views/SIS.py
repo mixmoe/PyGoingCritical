@@ -1,3 +1,6 @@
+import tkinter as tk
+from typing import Any, Dict
+
 from services.core import Network
 from services.models import SusceptibleInflectedSusceptible
 from services.render import Render
@@ -7,7 +10,7 @@ from ..components.interactive import InteractiveRoot
 
 __view_name__ = "SISModel"
 __view_widget__ = InteractiveRoot
-__view_args__ = {"name": __view_name__, "enableRecovery": True}
+__view_args__: Dict[str, Any] = {"name": __view_name__, "enableRecovery": True}
 
 EventBus = EventBusNamespace.get(__view_name__, create=True)
 
@@ -15,6 +18,11 @@ _MODEL = None
 _NETWORK = Network(30, 30)
 _RECOVERY_RATE = 0
 _TRANSMISSION_RATE = 0
+
+
+class SISModelRoot(InteractiveRoot):
+    def __init__(self, root: tk.Widget) -> None:
+        super().__init__(root, **__view_args__)
 
 
 @EventBus.subscribe("reset")

@@ -8,5 +8,5 @@ class TabSwitcherRoot(tk.Frame):
         self.notebook = ttk.Notebook(self)
         self.notebook.grid(column=0, row=0)
 
-    def add(self, component: tk.Widget, *, name: str):
-        self.notebook.add(component, text="name")
+    def add(self, component: tk.Widget, name: str):
+        self.notebook.add(component, text=name)
