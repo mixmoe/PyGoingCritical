@@ -95,7 +95,7 @@ class Network:
         return nodes
 
     def makeDensityDistribution(
-        self, center: Tuple[int, int], *, density: int = 2, radius: int = 5
+        self, center: Tuple[int, int], *, density: float = 2, radius: int = 5
     ):
         x, y = center
         centerNode = self.get(x, y)

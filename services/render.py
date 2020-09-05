@@ -14,9 +14,9 @@ SpreadModel_T = Callable[[Network], Iterator[Network]]
 Render_T = Callable[[Network], Callable[..., ImageClass]]
 
 COLOR_MAP = {
-    Status.SUSCEPTIBLE: "#569AE2",
-    Status.INFLECTED: "#FF7C7C",
-    Status.REMOVED: "#9287E7",
+    Status.SUSCEPTIBLE: "#3333FF",
+    Status.INFLECTED: "#FF3333",
+    Status.REMOVED: "#333333",
 }
 CELL_SIZE = 20
 GRID_SIZE = 2
@@ -53,7 +53,7 @@ class Render:
         x = cell.x * (self.cellSize + self.gridSize) + self.gridSize
         y = cell.y * (self.cellSize + self.gridSize) + self.gridSize
         r, g, b, *_ = ImageColor.getrgb(self.colorMap[cell.status])
-        c = Image.new("RGBA", (self.cellSize, self.cellSize), (r, g, b, 0xBF))
+        c = Image.new("RGBA", (self.cellSize, self.cellSize), (r, g, b, 0x80))
         return c, x, y
 
     @TimeIt
@@ -73,6 +73,6 @@ class DensityRender(Render):
         x = cell.x * (self.cellSize + self.gridSize) + self.gridSize
         y = cell.y * (self.cellSize + self.gridSize) + self.gridSize
         r, g, b, *_ = ImageColor.getrgb(self.colorMap[cell.status])
-        a = 0xBF + round((cell.density - 1) * 0x40)
+        a = 0x80 + round((cell.density - 1) * 0x80)
         c = Image.new("RGBA", (self.cellSize, self.cellSize), (r, g, b, a))
         return c, x, y
