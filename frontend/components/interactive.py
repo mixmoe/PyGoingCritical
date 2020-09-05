@@ -1,9 +1,15 @@
 import tkinter as tk
 from typing import Tuple
 
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk  # type:ignore
 
 from ..bus import EventBusNamespace
+
+PROMPT_TEXT = """
+红色: 感染者
+蓝色: 易感人群
+灰色: 死亡/免疫
+"""
 
 
 class BusProvider:
@@ -70,7 +76,7 @@ class AdjustLayerRoot(tk.Frame, BusProvider):
         tk.Frame.__init__(self, master=root)
         BusProvider.__init__(self, name=name)
         self.widgetName = name
-        self.densityEnabled = tk.BooleanVar(master=self, value=False)
+        self.densityEnabled = tk.BooleanVar(master=self, value=enableDensity)
         self.transmissionRateText = tk.Label(master=self, text="传染率")
         self.transmissionRateAdjuster = tk.Scale(
             master=self,
@@ -151,9 +157,11 @@ class InteractiveRoot(tk.Frame):
             enableRecovery=enableRecovery,
             enableDensity=enableDensity,
         )
+        self.prompt = tk.Label(self, text=PROMPT_TEXT, justify=tk.LEFT)
 
         self.imageView.grid(column=0, row=0)
         self.buttons.grid(column=0, row=1)
         self.adjust.grid(column=0, row=2)
+        self.prompt.grid(column=0, row=0, sticky=tk.NE)
 
         self.after(20, lambda: self.eventBus.broadcast("init", self))

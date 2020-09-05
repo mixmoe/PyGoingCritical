@@ -37,7 +37,10 @@ class _EventBus:
                 raise
 
         self.events[event] = self.events.get(event, set()) | {wrapper}  # type:ignore
-        logger.debug(f"{handler}")
+        logger.debug(
+            f"Function {handler.__module__}.{handler.__name__} is "
+            f"registered as a handler of {self.name} -> {event!r}."
+        )
         return handler
 
     @TimeIt
@@ -50,7 +53,7 @@ class _EventBus:
             except Exception:
                 errors += 1
         logger.info(
-            f"Event {self.name}>{event!r} broadcast finished, "
+            f"Event {self.name} -> {event!r} broadcast finished, "
             f"{errors} handlers failed in total {total}."
         )
         return errors, total
