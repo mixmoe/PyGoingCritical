@@ -138,7 +138,6 @@ class InteractiveRoot(tk.Frame):
         enableRecovery: bool = False,
         enableDensity: bool = False,
     ):
-        global _EVENT_BUS
         super().__init__(root)
         self.widgetName = name
         self.eventBus = EventBusNamespace.register(name)

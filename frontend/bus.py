@@ -62,6 +62,7 @@ class EventBusNamespace:
     @classmethod
     def register(cls, name: str) -> _EventBus:
         cls._eventBuses[name] = _EventBus(name)
+        logger.debug(f"Event namespace {name!r} is created.")
         return cls.get(name)
 
     @classmethod
@@ -88,7 +89,8 @@ class EventBusNamespace:
     def set(cls, name: str, **property) -> Dict[str, Any]:
         assert name in cls._eventBuses
         cls._eventProperty[name] = {**cls._eventProperty.get(name, {}), **property}
+        logger.debug(f"The property of Namespace {cls._eventProperty[name]} set up.")
         return cls._eventProperty[name]
 
 
-EventBus = EventBusNamespace.get("default")
+EventBus = EventBusNamespace.get("default", create=True)
