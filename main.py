@@ -14,7 +14,6 @@ COPYRIGHT = r"""
 Copyright 2020 mixmoe, all rights reserved.
 Publish under GPLv3 license
 Repository: https://github.com/mixmoe/PyGoingCritical
-///SCHOOL PROJECT DEMO, NOT OPENSOURCED YET///
 """  # noqa:W291
 
 if __name__ == "__main__":
